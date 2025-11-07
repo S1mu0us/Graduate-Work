@@ -16,4 +16,7 @@
 sudo apt update
 sudo apt upgrade
 sudo apt install unzip wget git ansible
+wget https://hashicorp-releases.yandexcloud.net/terraform/1.13.5/terraform_1.13.5_linux_amd64.zip
+unzip terraform_1.13.5_linux_amd64.zip
+sudo mv terraform /usr/local/bin/
 ```
