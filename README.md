@@ -1,6 +1,6 @@
 #  Дипломная работа по профессии «[Системный администратор](https://github.com/netology-code/sys-diplom/blob/diplom-zabbix/README.md)»
 
-## Создание ВМ
+## Создание и подготовка ВМ
 
 Характеристики системы: 
 * Платформа:                      `Intel Ice Lake`
@@ -9,4 +9,11 @@
 * RAM:                            `2 ГБ`
 * Объём дискового пространства:   `10 ГБ`
 * Прерываемая:                    `Да`
-* ОС:                             `Ubuntu`
+* ОС:                             `Ubuntu 24.04`
+
+### Установка пакетов
+```
+sudo apt update
+sudo apt upgrade
+sudo apt install unzip wget git ansible
+```
