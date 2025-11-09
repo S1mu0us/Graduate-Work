@@ -13,7 +13,7 @@
 * Прерываемая:                    `Да`
 * ОС:                             `Ubuntu 24.04`
 
-### Установка пакетов
+Установка пакетов
 ```
 sudo apt update
 sudo apt upgrade
@@ -22,7 +22,8 @@ wget https://hashicorp-releases.yandexcloud.net/terraform/1.13.5/terraform_1.13.
 unzip terraform_1.13.5_linux_amd64.zip
 sudo mv terraform /usr/local/bin/
 ```
-### Создание ключа-доступа для terraform
+
+Создание ключа-доступа для terraform
 ```
 yc init
 yc iam key create --service-account-id aj6***********lmj --output tf-key.json
