@@ -48,4 +48,7 @@ chmod 600 tf-key.json
 mkdir tf-yc
 cd tf-yc
 nano main.tf
+nano ~/.terraformrc
+terraform init
+nano main.tf
 ```
