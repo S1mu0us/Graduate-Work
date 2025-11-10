@@ -30,29 +30,6 @@ yc iam key create --service-account-id aj6***********lmj --output tf-key.json
 chmod 600 tf-key.json
 ```
 
----
-
-### Полный код
-```bash
-sudo apt update
-sudo apt upgrade
-sudo apt install unzip wget git ansible
-wget https://hashicorp-releases.yandexcloud.net/terraform/1.13.5/terraform_1.13.5_linux_amd64.zip
-unzip terraform_1.13.5_linux_amd64.zip
-sudo mv terraform /usr/local/bin/
-curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-exec -l $SHELL
-yc init
-yc iam key create --service-account-id aj6***********lmj --output tf-key.json
-chmod 600 tf-key.json
-mkdir tf-yc
-cd tf-yc
-nano main.tf
-nano ~/.terraformrc
-terraform init
-nano main.tf
-```
-
 .terraformrc
 ```hcl
 provider_installation {
@@ -101,4 +78,27 @@ resource "yandex_vpc_subnet" "private" {
   network_id = yandex_vpc_network.main.id
   v4_cidr_blocks = ["10.10.2.0/24"]
 }
+```
+
+---
+
+### Полный код
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install unzip wget git ansible
+wget https://hashicorp-releases.yandexcloud.net/terraform/1.13.5/terraform_1.13.5_linux_amd64.zip
+unzip terraform_1.13.5_linux_amd64.zip
+sudo mv terraform /usr/local/bin/
+curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+exec -l $SHELL
+yc init
+yc iam key create --service-account-id aj6***********lmj --output tf-key.json
+chmod 600 tf-key.json
+mkdir tf-yc
+cd tf-yc
+nano main.tf
+nano ~/.terraformrc
+terraform init
+nano main.tf
 ```
