@@ -82,7 +82,7 @@ resource "yandex_vpc_subnet" "private" {
 
 ---
 
-### Полный код
+### простыня запросов
 ```bash
 sudo apt update
 sudo apt upgrade
