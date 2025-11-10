@@ -33,7 +33,7 @@ chmod 600 tf-key.json
 ---
 
 ### Полный код
-```
+```bash
 sudo apt update
 sudo apt upgrade
 sudo apt install unzip wget git ansible
@@ -51,4 +51,54 @@ nano main.tf
 nano ~/.terraformrc
 terraform init
 nano main.tf
+```
+
+.terraformrc
+```hcl
+provider_installation {
+  network_mirror {
+    url = "https://terraform-mirror.yandexcloud.net/"
+    include = ["registry.terraform.io/*/*"]
+  }
+  direct {
+    exclude = ["registry.terraform.io/*/*"]
+  }
+}
+```
+
+main.tf
+```hcl
+terraform {
+  required_providers {
+    yandex = {
+      source = "yandex-cloud/yandex"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "yandex" {
+  service_account_key_file = "tf-key.json"
+  cloud_id = "b1****************t4"
+  folder_id = "b1***************8g"
+  zone = "ru-central1-b"
+}
+
+resource "yandex_vpc_network" "main" {
+  name = "main-network"
+}
+
+resource "yandex_vpc_subnet" "public" {
+  name = "public-subnet"
+  zone = "ru-central1-b"
+  network_id = yandex_vpc_network.main.id
+  v4_cidr_blocks = ["10.10.1.0/24"]
+}
+
+resource "yandex_vpc_subnet" "private" {
+  name = "private-subnet"
+  zone = "ru-central1-a"
+  network_id = yandex_vpc_network.main.id
+  v4_cidr_blocks = ["10.10.2.0/24"]
+}
 ```
