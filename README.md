@@ -42,7 +42,7 @@ chmod 600 tf-key.json
 * Подсеть:                        `public-subnet`
 
 ```
-Да
+ . . .
 ```
 
 .terraformrc
