@@ -30,6 +30,21 @@ yc iam key create --service-account-id aj6***********lmj --output tf-key.json
 chmod 600 tf-key.json
 ```
 
+### Подготовка бастион-сервера
+Характеристики системы: 
+* Платформа:                      `Intel Ice Lake`
+* Гарантированная доля vCPU:      `20%`
+* vCPU:                           `2`
+* RAM:                            `2 ГБ`
+* Объём дискового пространства:   `10 ГБ`
+* Прерываемая:                    `Да`
+* ОС:                             `Ubuntu 24.04`
+* Подсеть:                        `public-subnet`
+
+```
+Да
+```
+
 .terraformrc
 ```hcl
 provider_installation {
@@ -101,4 +116,5 @@ nano main.tf
 nano ~/.terraformrc
 terraform init
 nano main.tf
+terraform apply
 ```
