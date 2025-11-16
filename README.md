@@ -29,6 +29,25 @@ yc init
 yc iam key create --service-account-id aj6***********lmj --output tf-key.json
 chmod 600 tf-key.json
 ```
+Добавляем NAT-шлюз, формируем таблицу маршрутов и привязываем её к приватной подсети в наш `main.tf`. Используем вторую зону `ru-central1-a"` для повышения отказоустойчивости.
+```hcl
+
+resource "yandex_vpc_gateway" "nat_gateway" {
+  name = "nat-gateway"
+  shared_egress_gateway {}
+}
+resource "yandex_vpc_route_table" "private_routes" {
+  name = "private-route-table"
+  network_id = yandex_vpc_network.main.id
+
+  static_route {
+    destination_prefix = "0.0.0.0/0"
+    gateway_id = yandex_vpc_gateway.nat_gateway.id
+  }
+}
+
+### И дополнительно добавляем строчку route_table_id = yandex_vpc_route_table.private_routes.id в блок resource "yandex_vpc_subnet" "private"
+```
 
 ### Подготовка бастион-сервера
 Характеристики системы: 
