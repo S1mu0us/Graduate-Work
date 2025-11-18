@@ -184,4 +184,6 @@ yc vpc subnet list
 terraform init
 nano main.tf
 terraform apply
+yc vpc subnet list
+terraform import yandex_vpc_subnet.private_a e9***********vu
 ```
