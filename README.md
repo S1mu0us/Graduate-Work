@@ -12,6 +12,7 @@
 * Объём дискового пространства:   `10 ГБ`
 * Прерываемая:                    `Да`
 * ОС:                             `Ubuntu 24.04`
+* Внешний IP:                     `Да`
 
 Установка пакетов
 ```
@@ -39,6 +40,9 @@ resource "yandex_vpc_subnet" "private_a" {
   route_table_id = yandex_vpc_route_table.private_routes.id
 }
 ```
+Возникли некоторые трудности с созданием этой подсети из-за маршрутизации по зоне `ru-central1-a`, поэтому создал подсеть напрямую через `yandex cloud` и импортировал её в `terraform`, это помогло решить проблему.
+
+---
 
 Добавляем NAT-шлюз, формируем таблицу маршрутов и привязываем её к приватной подсети в наш `main.tf`.
 ```hcl
@@ -70,7 +74,6 @@ resource "yandex_vpc_subnet" "private_b" {
   route_table_id = yandex_vpc_route_table.private_routes.id
 }
 ```
-
 ### Подготовка бастион-сервера
 Характеристики системы: 
 * Платформа:                      `Intel Ice Lake`
@@ -80,11 +83,32 @@ resource "yandex_vpc_subnet" "private_b" {
 * Объём дискового пространства:   `10 ГБ`
 * Прерываемая:                    `Да`
 * ОС:                             `Ubuntu 24.04`
+* Внешний IP:                     `Да`
 * Подсеть:                        `public-subnet`
 
-```
- . . .
-```
+### Подготовка веб-сервера 1 `web1` в зоне `ru-central1-a`
+Характеристики системы: 
+* Платформа:                      `Intel Ice Lake`
+* Гарантированная доля vCPU:      `20%`
+* vCPU:                           `2`
+* RAM:                            `2 ГБ`
+* Объём дискового пространства:   `10 ГБ`
+* Прерываемая:                    `Да`
+* ОС:                             `Ubuntu 24.04`
+* Внешний IP:                     `Нет`
+* Подсеть:                        `private-subnet-a`
+
+### Подготовка веб-сервера 2 `web2` в зоне `ru-central1-b`
+Характеристики системы: 
+* Платформа:                      `Intel Ice Lake`
+* Гарантированная доля vCPU:      `20%`
+* vCPU:                           `2`
+* RAM:                            `2 ГБ`
+* Объём дискового пространства:   `10 ГБ`
+* Прерываемая:                    `Да`
+* ОС:                             `Ubuntu 24.04`
+* Внешний IP:                     `Нет`
+* Подсеть:                        `private-subnet-b`
 
 .terraformrc
 ```hcl
@@ -155,6 +179,8 @@ mkdir tf-yc
 cd tf-yc
 nano main.tf
 nano ~/.terraformrc
+yc vpc subnet list
+
 terraform init
 nano main.tf
 terraform apply
