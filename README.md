@@ -29,7 +29,18 @@ yc init
 yc iam key create --service-account-id aj6***********lmj --output tf-key.json
 chmod 600 tf-key.json
 ```
-Добавляем NAT-шлюз, формируем таблицу маршрутов и привязываем её к приватной подсети в наш `main.tf`. Используем вторую зону `ru-central1-a"` для повышения отказоустойчивости.
+Создаём приватную подсеть в зоне `ru-central1-a`
+```
+resource "yandex_vpc_subnet" "private_a" {
+  name = "private-subnet-a"
+  zone = "ru-central1-a"
+  network_id = yandex_vpc_network.main.id
+  v4_cidr_blocks = ["10.10.2.0/24"]
+  route_table_id = yandex_vpc_route_table.private_routes.id
+}
+```
+
+Добавляем NAT-шлюз, формируем таблицу маршрутов и привязываем её к приватной подсети в наш `main.tf`.
 ```hcl
 
 resource "yandex_vpc_gateway" "nat_gateway" {
@@ -46,7 +57,18 @@ resource "yandex_vpc_route_table" "private_routes" {
   }
 }
 
-### И дополнительно добавляем строчку route_table_id = yandex_vpc_route_table.private_routes.id в блок resource "yandex_vpc_subnet" "private"
+### И дополнительно добавляем строчку route_table_id = yandex_vpc_route_table.private_routes.id в блок resource "yandex_vpc_subnet" "private_a"
+```
+
+Создаём вторую подсеть, где будем использовать зону `ru-central-b`
+```
+resource "yandex_vpc_subnet" "private_b" {
+  name = "private-subnet-b"
+  zone = "ru-central1-b"
+  network_id = yandex_vpc_network.main.id
+  v4_cidr_blocks = ["10.10.3.0/24"]
+  route_table_id = yandex_vpc_route_table.private_routes.id
+}
 ```
 
 ### Подготовка бастион-сервера
