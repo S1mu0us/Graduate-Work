@@ -179,8 +179,6 @@ mkdir tf-yc
 cd tf-yc
 nano main.tf
 nano ~/.terraformrc
-yc vpc subnet list
-
 terraform init
 nano main.tf
 terraform apply
