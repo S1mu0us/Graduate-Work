@@ -152,7 +152,11 @@ Kibana:
   - `TCP` `9200` `Группа безопасности` `elasticsearch-sg`
 
 ---
-
+Создадим ssh-ключ для подключения к web1 и web2 и добавим его в метаданные
+```bash
+ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
+```
+---
 .terraformrc
 ```hcl
 provider_installation {
@@ -227,4 +231,10 @@ nano main.tf
 terraform apply
 yc vpc subnet list
 terraform import yandex_vpc_subnet.private_a e9***********vu
+ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
+cat ~/.ssh/id_rsa.pub
+ssh 10.10.2.29
+exit
+ssh 10.10.3.33
+exit
 ```
