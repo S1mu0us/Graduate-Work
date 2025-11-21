@@ -156,6 +156,16 @@ Kibana:
 ```bash
 ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 ```
+
+Устанавливаем на `web1` и `web2` nginx
+```bash
+ssh 10.10.2.29
+sudo apt update
+sudo apt install -y nginx
+sudo systemctl enable nginx
+```
+Аналогично и для `web2`
+
 ---
 .terraformrc
 ```hcl
@@ -234,7 +244,15 @@ terraform import yandex_vpc_subnet.private_a e9***********vu
 ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 cat ~/.ssh/id_rsa.pub
 ssh 10.10.2.29
+sudo apt update
+sudo apt install -y nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx
 exit
 ssh 10.10.3.33
+sudo apt update
+sudo apt install -y nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx
 exit
 ```
