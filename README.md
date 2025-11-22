@@ -114,6 +114,7 @@ resource "yandex_vpc_subnet" "private_b" {
 * Имя: `alb-sg`
 * Входящий трафик:
   - `TCP` `80` `CIDR` `0.0.0.0/0`
+  - `Any` `80` `CIDR` `198.18.235.0/24` `198.18.248.0/24` `198.18.254.0/24`
 * Исходящий трафик:
   - `Any` `0-65535` `CIDR` `0.0.0.0/0`  ------временно
 
@@ -164,7 +165,11 @@ sudo apt update
 sudo apt install -y nginx
 sudo systemctl enable nginx
 ```
-Аналогично и для `web2`
+Аналогично и для `web2`.
+
+Настраиваем балансировщик:
+
+Создаём целевую группу `target-group-web`, группу бэкенда `backend-group-web`, создаём HTTP-роутер `http-router-web` и балансировщик `application-load-balancer-web`.
 
 ---
 .terraformrc
