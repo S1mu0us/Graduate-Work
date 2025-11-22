@@ -169,7 +169,7 @@ sudo systemctl enable nginx
 
 Настраиваем балансировщик:
 
-Создаём целевую группу `target-group-web`, группу бэкенда `backend-group-web`, создаём HTTP-роутер `http-router-web` и балансировщик `application-load-balancer-web`.
+Создаём целевую группу `target-group-web`, группу бэкенда `backend-group-web`, создаём HTTP-роутер `http-router-web` и балансировщик `application-load-balancer-web` (важно в чтобы в группе безопасности был разрешен доступ к некоторым сервисам yandex для проверки состояня балансировщика).
 
 ---
 .terraformrc
@@ -260,4 +260,5 @@ sudo apt install -y nginx
 sudo systemctl enable nginx
 sudo systemctl status nginx
 exit
+curl http://<публичный ip нашего alb>
 ```
