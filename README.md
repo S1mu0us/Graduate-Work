@@ -187,6 +187,13 @@ sudo systemctl enable nginx
 * Подсеть:                        `public-subnet`
 * Группа безопасности:            `zabbix-sg`
 
+Авторизуемя и ставим репозиторий
+```
+wget https://repo.zabbix.com/zabbix/7.4/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.4+ubuntu22.04_all.deb
+sudo dpkg -i zabbix-release_latest_7.4+ubuntu22.04_all.deb
+
+```
+
 ---
 .terraformrc
 ```hcl
@@ -264,17 +271,24 @@ yc vpc subnet list
 terraform import yandex_vpc_subnet.private_a e9***********vu
 ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 cat ~/.ssh/id_rsa.pub
+
 ssh 10.10.2.29
 sudo apt update
 sudo apt install -y nginx
 sudo systemctl enable nginx
 sudo systemctl status nginx
 exit
+
 ssh 10.10.3.33
 sudo apt update
 sudo apt install -y nginx
 sudo systemctl enable nginx
 sudo systemctl status nginx
 exit
+
 curl http://<публичный ip нашего alb>
+
+wget https://repo.zabbix.com/zabbix/7.4/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.4+ubuntu22.04_all.deb
+sudo dpkg -i zabbix-release_latest_7.4+ubuntu22.04_all.deb
+sudo apt update
 ```
