@@ -274,7 +274,7 @@ FLUSH PRIVILEGES
 ```bash
 zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | sudo mysql -u zabbix -p zabbix
 ```
-В файле конфигурации `zabbix_server.conf` задаём пароль и перезпускаем сервисы.
+В файле конфигурации `zabbix_server.conf` задаём пароль и перезпускаем сервис.
 
 ---
 .terraformrc
@@ -386,5 +386,5 @@ EXIT
 ```bash
 zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | sudo mysql -u zabbix -p zabbix
 sudo nano /etc/zabbix/zabbix_server.conf
-
+sudo systemctl restart zabbix-server.service
 ```
