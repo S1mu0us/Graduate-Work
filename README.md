@@ -16,7 +16,7 @@
 * Группа безопасности:            `bastion-sg`
 
 Установка пакетов
-```
+```bash
 sudo apt update
 sudo apt upgrade
 sudo apt install unzip wget git ansible
@@ -26,7 +26,7 @@ sudo mv terraform /usr/local/bin/
 ```
 
 Создание ключа-доступа для terraform
-```
+```bash
 yc init
 yc iam key create --service-account-id aj6***********lmj --output tf-key.json
 chmod 600 tf-key.json
@@ -41,7 +41,7 @@ resource "yandex_vpc_subnet" "private_a" {
   route_table_id = yandex_vpc_route_table.private_routes.id
 }
 ```
-Возникли некоторые трудности с созданием этой подсети из-за маршрутизации по зоне `ru-central1-a`, поэтому создал подсеть напрямую через `yandex cloud` и импортировал её в `terraform`, это помогло решить проблему.
+>Возникли некоторые трудности с созданием этой подсети из-за маршрутизации по зоне `ru-central1-a`, поэтому создал подсеть напрямую через `yandex cloud` и импортировал её в `terraform`, это помогло решить проблему.
 
 ---
 
@@ -187,12 +187,94 @@ sudo systemctl enable nginx
 * Подсеть:                        `public-subnet`
 * Группа безопасности:            `zabbix-sg`
 
-Авторизуемя и ставим репозиторий
+Авторизуемя и ставим [репозиторий](https://www.zabbix.com/download?zabbix=6.0&os_distribution=ubuntu&os_version=22.04&components=server_frontend_agent&db=mysql&ws=apache).
+>Буду использовать MySQL для экономии времени, в ином случае пользовался бы PostgreSQL.
 ```
-wget https://repo.zabbix.com/zabbix/7.4/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.4+ubuntu22.04_all.deb
-sudo dpkg -i zabbix-release_latest_7.4+ubuntu22.04_all.deb
+wget wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu22.04_all.deb
+dpkg -i zabbix-release_latest_6.0+ubuntu22.04_all.deb
+```
+Дальше настроим прпавила безопасности `MariaDB` 
+```
+sudo mysql_secure_installation
+```
+И отвечаем на вопросы:
+>Setting the root password or using the unix_socket ensures that nobody
+>can log into the MariaDB root user without the proper authorisation.
+>
+>You already have your root account protected, so you can safely answer 'n'.
+>
+>Switch to unix_socket authentication [Y/n] n
+> 
+> ... skipping.
+>
+>You already have your root account protected, so you can safely answer 'n'.
+>
+>Change the root password? [Y/n] Y
+> 
+>New password:
+> 
+>Re-enter new password:
+> 
+>Password updated successfully!
+>Reloading privilege tables..
+> ... Success!
+>
+>
+>?By default, a MariaDB installation has an anonymous user, allowing anyone
+>to log into MariaDB without having to have a user account created for
+>them.  This is intended only for testing, and to make the installation
+>go a bit smoother.  You should remove them before moving into a
+>production environment.
+>
+>Remove anonymous users? [Y/n] Y
+> 
+> ... Success!
+>
+>Normally, root should only be allowed to connect from 'localhost'.  This
+>ensures that someone cannot guess at the root password from the network.
+>
+>Disallow root login remotely? [Y/n] Y
+> 
+> ... Success!
+>
+>By default, MariaDB comes with a database named 'test' that anyone can
+>access.  This is also intended only for testing, and should be removed
+>before moving into a production environment.
+>
+>Remove test database and access to it? [Y/n] Y
+> 
+>Remove test database and access to it? [Y/n] Y
+> 
+> - Dropping test database...
+> ... Success!
+> - Removing privileges on test database...
+> ... Success!
+>
+>Reloading the privilege tables will ensure that all changes made so far
+>will take effect immediately.
+>
+>Reload privilege tables now? [Y/n] Y
+> 
+> ... Success!
+>
+>Cleaning up...
+>All done!  If you've completed all of the above steps, your MariaDB
+>installation should now be secure.
 
+Thanks for using MariaDB!
+
+Далее формируем БД и пользователя:
+```sql
+CREATE DATABASE zabbix CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+CREATE USER 'zabbix'@'localhost' IDENTIFIED BY '<пароль>';
+GRANT ALL PRIVILEGES ON zabbix.* TO 'zabbix'@'localhost';
+FLUSH PRIVILEGES
 ```
+И импортируем
+```bash
+zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | sudo mysql -u zabbix -p zabbix
+```
+В файле конфигурации `zabbix_server.conf` задаём пароль и перезпускаем сервисы.
 
 ---
 .terraformrc
@@ -288,7 +370,21 @@ exit
 
 curl http://<публичный ip нашего alb>
 
-wget https://repo.zabbix.com/zabbix/7.4/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.4+ubuntu22.04_all.deb
-sudo dpkg -i zabbix-release_latest_7.4+ubuntu22.04_all.deb
+sudo su
+wget wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu22.04_all.deb
+sudo dpkg -i zabbix-release_latest_6.0+ubuntu22.04_all.deb
 sudo apt update
+sudo mysql -u root -p
+```
+```sql
+CREATE DATABASE zabbix CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+CREATE USER 'zabbix'@'localhost' IDENTIFIED BY '<пароль>';
+GRANT ALL PRIVILEGES ON zabbix.* TO 'zabbix'@'localhost';
+FLUSH PRIVILEGES;
+EXIT
+```
+```bash
+zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | sudo mysql -u zabbix -p zabbix
+sudo nano /etc/zabbix/zabbix_server.conf
+
 ```
