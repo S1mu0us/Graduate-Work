@@ -135,6 +135,7 @@ Elasticsearch:
 * Входящий трафик:
   - `TCP` `9200` `Группа безопасности` `web-sg`
   - `TCP` `9200` `Группа безопасности` `kibana-sg`
+  - `TCP` `22` `Группа безопасности` `bastion-sg`
 * Исходящий трафик:
   - `Any` `0-65535` `CIDR` `0.0.0.0/0`  ------временно
  
@@ -291,6 +292,39 @@ sudo nano /etc/zabbix/zabbix_agentd.conf
 ```
 В веб-интерфейса zabbix добавляем хосты.
 
+---
+Теперь создадим ВМ `elasticsearch-machine` и установим `Elasticsearch`
+
+Характеристики системы: 
+* Платформа:                      `Intel Ice Lake`
+* Гарантированная доля vCPU:      `20%`
+* vCPU:                           `2`
+* RAM:                            `4 ГБ`
+* Объём дискового пространства:   `10 ГБ`
+* Прерываемая:                    `Да`
+* ОС:                             `Ubuntu 24.04`
+* Внешний IP:                     `Нет`
+* Подсеть:                        `private-subnet-b`
+* Группа безопасности:            `elasticsearch-sg`
+
+Устанавливаем `java` и `Elasticsearch`
+```bash
+sudo apt install openjdk-25-jdk -y
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+sudo apt-get install apt-transport-https
+echo "deb [trusted=yes] https://mirror.yandex.ru/mirrors/elastic/9/ stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch.list
+sudo apt update
+sudo apt install elasticsearch
+```
+>Возникли трудности с установкой официальног репозитория Elastic, поэтому использовал [зеркало](https://mirror.yandex.ru/mirrors/elastic) Yandex
+
+Далее залезаем в конфиг `/etc/elasticsearch/elasticsearch.yml` и изменяем параметры:
+* Раскомментировать `cluster.name: my-logs-cluster`, `node.name: node-1` и `http.port: 9200`
+* Изменить `network.host: 0.0.0.0`
+* Добавить `discovery.type: single-node` и закомментировать `cluster.initial_master_nodes:`
+
+Сохраняем, перезапускаем и проверяем elasticsearch.
+>Для моей версии 9.* потребовался пароль, чтобы открыть ссылку.
 
 ---
 .terraformrc
