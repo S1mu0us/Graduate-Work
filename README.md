@@ -285,8 +285,11 @@ wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix
 dpkg -i zabbix-release_latest_6.0+ubuntu24.04_all.deb
 apt update
 apt install zabbix-agent -y
+sudo nano /etc/zabbix/zabbix_agentd.conf
+#В `Server=` и `ServerActive=` выставляем внутренний ip-адресс нашей вм с zabbix `zabbix-machine`, т.е. 10.10.1.26
+#В пункте `Hostname=` указываем название веб-сервера `web1`/`web2`
 ```
-
+В веб-интерфейса zabbix добавляем хосты.
 
 
 ---
