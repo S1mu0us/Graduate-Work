@@ -188,10 +188,10 @@ sudo systemctl enable nginx
 * Подсеть:                        `public-subnet`
 * Группа безопасности:            `zabbix-sg`
 
-Авторизуемя и ставим [репозиторий](https://www.zabbix.com/download?zabbix=6.0&os_distribution=ubuntu&os_version=22.04&components=server_frontend_agent&db=mysql&ws=apache).
+Авторизуемя и ставим [репозиторий](https://www.zabbix.com/download?zabbix=6.0&os_distribution=ubuntu&os_version=24.04&components=server_frontend_agent&db=mysql&ws=apache).
 >Буду использовать MySQL для экономии времени, в ином случае пользовался бы PostgreSQL.
 ```
-wget wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu22.04_all.deb
+wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb
 dpkg -i zabbix-release_latest_6.0+ubuntu22.04_all.deb
 ```
 Дальше настроим прпавила безопасности `MariaDB` 
@@ -275,7 +275,19 @@ FLUSH PRIVILEGES
 ```bash
 zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | sudo mysql -u zabbix -p zabbix
 ```
-В файле конфигурации `zabbix_server.conf` задаём пароль и перезпускаем сервис.
+В файле конфигурации `zabbix_server.conf` задаём пароль и перезпускаем сервис. После подключаемся к zabbix по http://<ip-zabbix-machine>/zabbix, проходим первичные шаги по установке и входим в профиль.
+
+Далее устанавливаем zabbix-agent на наши веб-сервера `web1` и `web2`:
+```bash
+ssh 10.10.2.29 #10.10.3.33 для web2
+sudo su
+wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb
+dpkg -i zabbix-release_latest_6.0+ubuntu24.04_all.deb
+apt update
+apt install zabbix-agent -y
+```
+
+
 
 ---
 .terraformrc
