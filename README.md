@@ -403,4 +403,26 @@ EXIT
 zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | sudo mysql -u zabbix -p zabbix
 sudo nano /etc/zabbix/zabbix_server.conf
 sudo systemctl restart zabbix-server.service
+ssh 10.10.2.29
+sudo su
+wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb
+dpkg -i zabbix-release_latest_6.0+ubuntu24.04_all.deb
+apt update
+apt install zabbix-agent -y
+nano /etc/zabbix/zabbix_agentd.conf
+exit
+sudo systemctl restart zabbix-agent.service
+sudo systemctl status zabbix-agent.service
+exit
+ssh 10.10.3.33
+sudo su
+wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb
+dpkg -i zabbix-release_latest_6.0+ubuntu24.04_all.deb
+apt update
+apt install zabbix-agent -y
+nano /etc/zabbix/zabbix_agentd.conf
+exit
+sudo systemctl restart zabbix-agent.service
+sudo systemctl status zabbix-agent.service
+exit
 ```
