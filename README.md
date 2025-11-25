@@ -143,6 +143,7 @@ Kibana:
 * Имя: `kibana-sg`
 * Входящий трафик:
   - `TCP` `5601` `CIDR` `0.0.0.0/0`  ------временно
+  - `TCP` `22` `Группа безопасности` `bastion-sg`
 * Исходящий трафик:
   - `Any` `0-65535` `CIDR` `0.0.0.0/0`
 
@@ -325,6 +326,30 @@ sudo apt install elasticsearch
 
 Сохраняем, перезапускаем и проверяем elasticsearch.
 >Для моей версии 9.* потребовался пароль, чтобы открыть ссылку.
+
+Далее создадим ВМ `kibana-machine` и установим `Kibana`
+
+Характеристики системы: 
+* Платформа:                      `Intel Ice Lake`
+* Гарантированная доля vCPU:      `20%`
+* vCPU:                           `2`
+* RAM:                            `2 ГБ`
+* Объём дискового пространства:   `10 ГБ`
+* Прерываемая:                    `Да`
+* ОС:                             `Ubuntu 24.04`
+* Внешний IP:                     `Нет`
+* Подсеть:                        `private-subnet-b`
+* Группа безопасности:            `kibana-sg`
+
+Скачиваем репозиторий Kibana с [зеркала](https://mirror.yandex.ru/mirrors/elastic/9/pool/main/k/kibana/) Яндекс
+```bash
+wget https://mirror.yandex.ru/mirrors/elastic/9/pool/main/k/kibana/kibana-9.2.1-amd64.deb
+sudo dpkg -i kibana-9.2.1-amd64.deb
+```
+После залетаем в конфиг kibana.yml, открываем `server.port: 5601`, `server.host: "0.0.0.0"`, `elasticsearch.hosts: ["https://10.10.3.9:9200"]` `elasticsearch.username: "elastic"` `elasticsearch.password: "<pL***********XI>"` и `elasticsearch.ssl.verificationMode: none`
+
+Сохраняем и перезапускаем сервис.
+
 
 ---
 .terraformrc
