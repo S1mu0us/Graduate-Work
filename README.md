@@ -356,6 +356,7 @@ sudo /usr/share/elasticsearch/bin/elasticsearch-service-tokens create elastic/ki
 
 Сохраняем и перезапускаем сервис.
 
+>На самом деле это был тот ещё квест на несколько часов, заставить elastic запуститься в браузере на локальном пк
 
 ---
 .terraformrc
