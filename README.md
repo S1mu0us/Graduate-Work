@@ -346,7 +346,13 @@ sudo apt install elasticsearch
 wget https://mirror.yandex.ru/mirrors/elastic/9/pool/main/k/kibana/kibana-9.2.1-amd64.deb
 sudo dpkg -i kibana-9.2.1-amd64.deb
 ```
-После залетаем в конфиг kibana.yml, открываем `server.port: 5601`, `server.host: "0.0.0.0"`, `elasticsearch.hosts: ["https://10.10.3.9:9200"]` `elasticsearch.username: "elastic"` `elasticsearch.password: "<pL***********XI>"` и `elasticsearch.ssl.verificationMode: none`
+Идём на `elasticsearch-machine` и создадим там токен для kibana: 
+```
+sudo /usr/share/elasticsearch/bin/elasticsearch-service-tokens create elastic/kibana kibana-token
+```
+После залетаем в конфиг kibana.yml, открываем `server.port: 5601` `server.host: "0.0.0.0"` `elasticsearch.hosts: ["https://10.10.3.9:9200"]` `elasticsearch.serviceAccountToken: "AA*********************************0hR"` и `elasticsearch.ssl.verificationMode: none`
+
+>Авторизация по логину и паролю elasticsearch недоступна в версии kibana 9.*
 
 Сохраняем и перезапускаем сервис.
 
