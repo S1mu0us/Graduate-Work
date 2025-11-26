@@ -371,8 +371,7 @@ sudo ./elastic-agent install \
   --insecure \
   --install-servers
 ```
-
-
+Теперь на личном опыту убеждаемся, что всё имеет статус unhealthy, даже несмотря на танцы с бубном, о которых я не писал, и переносим всё в докер.
 
 ---
 .terraformrc
