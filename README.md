@@ -356,7 +356,23 @@ sudo /usr/share/elasticsearch/bin/elasticsearch-service-tokens create elastic/ki
 
 Сохраняем и перезапускаем сервис.
 
->На самом деле это был тот ещё квест на несколько часов, заставить elastic запуститься в браузере на локальном пк
+Теперь в Kibana UI устанавливаем Fleet Server, он будет стоять у нас на `kibana-machine`, для этого нужно выбрать нужные параметры на страничке и вбить в консоль с ВМ, но мы идём немного иным путём из-за особенностей сетевой архитектуры и региональных ограничений:
+
+```
+wget https://mirror.yandex.ru/mirrors/elastic/9/pool/main/k/kibana/kibana-9.2.1-amd64.deb
+sudo dpkg -i kibana-9.2.1-amd64.deb
+cd elastic-agent-9.2.1-linux-x86_64
+sudo ./elastic-agent install \
+  --fleet-server-es=https://10.10.3.9:9200 \
+  --fleet-server-service-token=AAEA***********************************FqUQ \
+  --fleet-server-policy=fleet-server-policy \
+  --fleet-server-port=8220 \
+  --fleet-server-es-ca-trusted-fingerprint=6B**************************63 \
+  --insecure \
+  --install-servers
+```
+
+
 
 ---
 .terraformrc
