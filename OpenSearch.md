@@ -14,3 +14,5 @@ ssh -L 127.0.0.1:5601:10.10.3.11:5601 vmadmin@<ip-graduate-work-vm>
 Провёл манипуляции с отключением режима безопасности в opensearch, чтобы не мучаться с сертификатами.
 
 Скачиваем Logstash и Filebeat. На Logstash устанавливаем плагин logstash-output-opensearch
+
+Создадим файл конфигурации для плагина /etc/logstash/conf.d/beats-to-opensearch.conf
