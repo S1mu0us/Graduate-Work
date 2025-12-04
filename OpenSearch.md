@@ -14,8 +14,14 @@ ssh -L 127.0.0.1:5601:10.10.3.11:5601 vmadmin@<ip-graduate-work-vm>
 Провёл манипуляции с отключением режима безопасности в opensearch, чтобы не мучаться с сертификатами.
 
 Скачиваем Logstash и Filebeat. На Logstash устанавливаем плагин logstash-output-opensearch
+```
+sudo nano /etc/filebeat/filebeat.yml
+```
 
-Создадим файл конфигурации для плагина /etc/logstash/conf.d/beats-to-opensearch.conf
+Создадим файл конфигурации для плагина beats-to-opensearch.conf
+```
+sudo nano /etc/logstash/conf.d/beats-to-opensearch.conf
+```
 
 Установим filebeat на web1 и web2, настроем выход на logstash.
 Включаем модули:
@@ -25,7 +31,8 @@ sudo filebeat modules enable nginx
 sudo filebeat test output
 ```
 
-В logstash добавляем пайплайн `nginx.conf` для nginx и проверяем:
+В logstash добавляем плагин `nginx.conf` для nginx и проверяем:
 ```bash
+sudo nano /etc/logstash/conf.d/nginx.conf
 sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash -t
 ```
