@@ -9,8 +9,8 @@ terraform {
 
 provider "yandex" {
   service_account_key_file = "tf-key.json"
-  cloud_id = "b1gmi54303rg7a6bekt4"
-  folder_id = "b1g25pktec9d3jpkro8g"
+  cloud_id = "*****************"
+  folder_id = "*****************"
   zone = "ru-central1-b"
 }
 
@@ -54,4 +54,5 @@ resource "yandex_vpc_route_table" "private_routes" {
     destination_prefix = "0.0.0.0/0"
     gateway_id = yandex_vpc_gateway.nat_gateway.id
   }
+
 }
