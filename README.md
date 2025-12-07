@@ -268,6 +268,10 @@ sudo nano /etc/logstash/conf.d/nginx.conf
 sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash -t
 ```
 
+Дальше сделаем резервное копирование
+
+<img src="image/snapshots.png" alt="OpenSearch" width="500"> 
+
 Когда всё "зелёное", можно приступить к созданию дешбордов: в opensearch для логов и zabbix для мониторинга:
 
 ## OpenSearch
