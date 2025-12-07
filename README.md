@@ -1,19 +1,7 @@
 #  Дипломная работа по профессии «[Системный администратор](https://github.com/netology-code/sys-diplom/blob/diplom-zabbix/README.md)»
 ---
-## ...*находится в разработке*...
----
-## Создание и подготовка ВМ `graduate-work-vm`, она же будет играть бастиона. 
 
-Характеристики системы: 
-* Платформа:                      `Intel Ice Lake`
-* Гарантированная доля vCPU:      `20%`
-* vCPU:                           `2`
-* RAM:                            `2 ГБ`
-* Объём дискового пространства:   `10 ГБ`
-* Прерываемая:                    `Да`
-* ОС:                             `Ubuntu 24.04`
-* Внешний IP:                     `Да`
-* Группа безопасности:            `bastion-sg`
+Создаём и подготавливаем ВМ [`bastion-vm`](Building_virtual_machines.md), она будет играть роль бастиона. 
 
 Установка пакетов
 ```bash
@@ -31,7 +19,7 @@ yc init
 yc iam key create --service-account-id aj6***********lmj --output tf-key.json
 chmod 600 tf-key.json
 ```
-Создаём приватную подсеть в зоне `ru-central1-a`
+Создаём приватную [подсеть](Building_virtual_machines.md) в зоне `ru-central1-a`
 ```
 resource "yandex_vpc_subnet" "private_a" {
   name = "private-subnet-a"
