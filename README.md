@@ -1,7 +1,7 @@
 #  Дипломная работа по профессии «[Системный администратор](https://github.com/netology-code/sys-diplom/blob/diplom-zabbix/README.md)»
 ---
 
-Создаём и подготавливаем ВМ [`bastion-vm`](Building_virtual_machines.md), она будет играть роль бастиона. 
+Создаём и подготавливаем ВМ [`bastion-vm`](Building_virtual_machines.md) <sub>Ранее: graduate-work-vm</sub> , она будет играть роль бастиона. 
 
 Установка пакетов
 ```bash
@@ -12,6 +12,8 @@ wget https://hashicorp-releases.yandexcloud.net/terraform/1.13.5/terraform_1.13.
 unzip terraform_1.13.5_linux_amd64.zip
 sudo mv terraform /usr/local/bin/
 ```
+<img src="image/vm-update.png" width="800">
+
 
 Создание ключа-доступа для terraform
 ```bash
@@ -29,7 +31,7 @@ resource "yandex_vpc_subnet" "private_a" {
   route_table_id = yandex_vpc_route_table.private_routes.id
 }
 ```
->Возникли некоторые трудности с созданием этой подсети из-за маршрутизации по зоне `ru-central1-a`, поэтому создал подсеть напрямую через `yandex cloud` и импортировал её в `terraform`, это помогло решить проблему.
+>Возникли трудности с ручным созданием подсети из-за маршрутизации по зоне `ru-central1-a`, поэтому создал подсеть напрямую через `yandex cloud` и импортировал её в `terraform`, это помогло решить проблему.
 
 ---
 
