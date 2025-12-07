@@ -217,217 +217,63 @@ sudo nano /etc/zabbix/zabbix_agentd.conf
 <img src="image/hosts.png" width="800"> 
 
 ---
-Теперь создадим ВМ `elasticsearch-machine` и установим `Elasticsearch`
 
-Характеристики системы: 
-* Платформа:                      `Intel Ice Lake`
-* Гарантированная доля vCPU:      `20%`
-* vCPU:                           `2`
-* RAM:                            `4 ГБ`
-* Объём дискового пространства:   `10 ГБ`
-* Прерываемая:                    `Да`
-* ОС:                             `Ubuntu 24.04`
-* Внешний IP:                     `Нет`
-* Подсеть:                        `private-subnet-b`
-* Группа безопасности:            `elasticsearch-sg`
+Далее была [попытка](elasticsearch.md) поднять `Elasticsearch` + `Kibana`, но на этапе подключения web1 и web2 возникли проблемы, поэтому было принято решение использовать форк Elasticsearch, т.е. `Opensearch`
 
-Устанавливаем `java` и `Elasticsearch`
+Создаём отдельные вм: [`opensearch-machine`]((Building_virtual_machines.md)) <sub>elasticsearch-machine</sub> для opensearch-server и [`logstash-machine`]((Building_virtual_machines.md)) <sub>kibana-machine</sub> для opensearch-dashboards, logstash и filebeats
+
+Устанавливаем репу [OpenSearch](https://opensearch.org/downloads/#data-ingest) на `opensearch-machine`
 ```bash
-sudo apt install openjdk-25-jdk -y
-wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
-sudo apt-get install apt-transport-https
-echo "deb [trusted=yes] https://mirror.yandex.ru/mirrors/elastic/9/ stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch.list
-sudo apt update
-sudo apt install elasticsearch
+wget https://artifacts.opensearch.org/releases/bundle/opensearch/3.3.2/opensearch-3.3.2-linux-x64.deb
+sudo dpkg -i opensearch-3.3.2-linux-x64.deb
+sudo nano /etc/opensearch/opensearch.yml #откроем порты, ноды и другие необходимые параметры
+sudo systemctl enable opensearch
+sudo systemctl start opensearch
+curl http://localhost:9200
 ```
->Возникли трудности с установкой официальног репозитория Elastic, поэтому использовал [зеркало](https://mirror.yandex.ru/mirrors/elastic) Yandex
+Похожим образом устанавливаем opensearch-dashboards на `logstash-machine` и открываем порты в конфиге
 
-Далее залезаем в конфиг `/etc/elasticsearch/elasticsearch.yml` и изменяем параметры:
-* Раскомментировать `cluster.name: my-logs-cluster`, `node.name: node-1` и `http.port: 9200`
-* Изменить `network.host: 0.0.0.0`
-* Добавить `discovery.type: single-node` и закомментировать `cluster.initial_master_nodes:`
+Пробрасываем порт `5601`
+```cmd
+ssh -L 127.0.0.1:5601:10.10.3.11:5601 vmadmin@<ip-graduate-work-vm>
+```
+Провёл манипуляции с отключением режима безопасности в opensearch, чтобы не мучаться с сертификатами. Доступ получаем только через бастион.
 
-Сохраняем, перезапускаем и проверяем elasticsearch.
->Для моей версии 9.* потребовался пароль, чтобы открыть ссылку.
+<img src="image/opensearch-menu.png" width="800"> 
 
-Далее создадим ВМ `kibana-machine` и установим `Kibana`
+Скачиваем Logstash и Filebeat на `logstash-machine`. Для Logstash устанавливаем плагин logstash-output-opensearch поскольку последняя версия `Opensearch` больше не взаимодействует напрямую с `Filebeats`, для этого и используем `Logstash`.
 
-Характеристики системы: 
-* Платформа:                      `Intel Ice Lake`
-* Гарантированная доля vCPU:      `20%`
-* vCPU:                           `2`
-* RAM:                            `2 ГБ`
-* Объём дискового пространства:   `10 ГБ`
-* Прерываемая:                    `Да`
-* ОС:                             `Ubuntu 24.04`
-* Внешний IP:                     `Нет`
-* Подсеть:                        `private-subnet-b`
-* Группа безопасности:            `kibana-sg`
+[<sub>filebeat.yml</sub>](config/filebeat.yml)
+```
+sudo nano /etc/filebeat/filebeat.yml
+```
 
-Скачиваем репозиторий Kibana с [зеркала](https://mirror.yandex.ru/mirrors/elastic/9/pool/main/k/kibana/) Яндекс
+Создадим файл конфигурации для плагина [`beats-to-opensearch.conf`](config/beats-to-opensearch.conf)
+```
+sudo nano /etc/logstash/conf.d/beats-to-opensearch.conf
+sudo nano /etc/logstash/conf.d/nginx.conf
+```
+
+Установим filebeat на `web1` и `web2`, настроем выход на logstash.
+Включаем модули:
 ```bash
-wget https://mirror.yandex.ru/mirrors/elastic/9/pool/main/k/kibana/kibana-9.2.1-amd64.deb
-sudo dpkg -i kibana-9.2.1-amd64.deb
-```
-Идём на `elasticsearch-machine` и создадим там токен для kibana: 
-```
-sudo /usr/share/elasticsearch/bin/elasticsearch-service-tokens create elastic/kibana kibana-token
-```
-После залетаем в конфиг kibana.yml, открываем `server.port: 5601` `server.host: "0.0.0.0"` `elasticsearch.hosts: ["https://10.10.3.9:9200"]` `elasticsearch.serviceAccountToken: "AA*********************************0hR"` и `elasticsearch.ssl.verificationMode: none`
-
->Авторизация по логину и паролю elasticsearch недоступна в версии kibana 9.*
-
-Сохраняем и перезапускаем сервис.
-
-Теперь в Kibana UI устанавливаем Fleet Server, он будет стоять у нас на `kibana-machine`, для этого нужно выбрать нужные параметры на страничке и вбить в консоль с ВМ, но мы идём немного иным путём из-за особенностей сетевой архитектуры и региональных ограничений:
-
-```
-wget https://mirror.yandex.ru/mirrors/elastic/9/pool/main/k/kibana/kibana-9.2.1-amd64.deb
-sudo dpkg -i kibana-9.2.1-amd64.deb
-cd elastic-agent-9.2.1-linux-x86_64
-sudo ./elastic-agent install \
-  --fleet-server-es=https://10.10.3.9:9200 \
-  --fleet-server-service-token=AAEA***********************************FqUQ \
-  --fleet-server-policy=fleet-server-policy \
-  --fleet-server-port=8220 \
-  --fleet-server-es-ca-trusted-fingerprint=6B**************************63 \
-  --insecure \
-  --install-servers
+sudo filebeat modules enable system
+sudo filebeat modules enable nginx
+sudo filebeat test output #Все статусы должны быть <OK>
 ```
 
-Честно, на этом этапе возникло столько проблем с Elastic, начиная от зомби-процессов, которые неубиваемы из-за политики безопасности и заканчивая багами самого UI и загрузкой через раз, (пробовал через докер, не помогло), поэтому мной было принято решение использовать в качестве альтернативы OpenSearch.
-
----
-.terraformrc
-```hcl
-provider_installation {
-  network_mirror {
-    url = "https://terraform-mirror.yandexcloud.net/"
-    include = ["registry.terraform.io/*/*"]
-  }
-  direct {
-    exclude = ["registry.terraform.io/*/*"]
-  }
-}
-```
-
-main.tf
-```hcl
-terraform {
-  required_providers {
-    yandex = {
-      source = "yandex-cloud/yandex"
-    }
-  }
-  required_version = ">= 0.13"
-}
-
-provider "yandex" {
-  service_account_key_file = "tf-key.json"
-  cloud_id = "b1****************t4"
-  folder_id = "b1***************8g"
-  zone = "ru-central1-b"
-}
-
-resource "yandex_vpc_network" "main" {
-  name = "main-network"
-}
-
-resource "yandex_vpc_subnet" "public" {
-  name = "public-subnet"
-  zone = "ru-central1-b"
-  network_id = yandex_vpc_network.main.id
-  v4_cidr_blocks = ["10.10.1.0/24"]
-}
-
-resource "yandex_vpc_subnet" "private" {
-  name = "private-subnet"
-  zone = "ru-central1-a"
-  network_id = yandex_vpc_network.main.id
-  v4_cidr_blocks = ["10.10.2.0/24"]
-}
-```
-
----
-
-### простыня запросов
+В logstash на `logstash-machine` добавляем плагин `nginx.conf` для [`nginx`](config/nginx.conf) и проверяем:
 ```bash
-sudo apt update
-sudo apt upgrade
-sudo apt install unzip wget git ansible
-wget https://hashicorp-releases.yandexcloud.net/terraform/1.13.5/terraform_1.13.5_linux_amd64.zip
-unzip terraform_1.13.5_linux_amd64.zip
-sudo mv terraform /usr/local/bin/
-curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-exec -l $SHELL
-yc init
-yc iam key create --service-account-id aj6***********lmj --output tf-key.json
-chmod 600 tf-key.json
-mkdir tf-yc
-cd tf-yc
-nano main.tf
-nano ~/.terraformrc
-terraform init
-nano main.tf
-terraform apply
-yc vpc subnet list
-terraform import yandex_vpc_subnet.private_a e9***********vu
-ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
-cat ~/.ssh/id_rsa.pub
-
-ssh 10.10.2.29
-sudo apt update
-sudo apt install -y nginx
-sudo systemctl enable nginx
-sudo systemctl status nginx
-exit
-
-ssh 10.10.3.33
-sudo apt update
-sudo apt install -y nginx
-sudo systemctl enable nginx
-sudo systemctl status nginx
-exit
-
-curl http://<публичный ip нашего alb>
-
-sudo su
-wget wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu22.04_all.deb
-sudo dpkg -i zabbix-release_latest_6.0+ubuntu22.04_all.deb
-sudo apt update
-sudo mysql -u root -p
+sudo nano /etc/logstash/conf.d/nginx.conf
+sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash -t
 ```
-```sql
-CREATE DATABASE zabbix CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
-CREATE USER 'zabbix'@'localhost' IDENTIFIED BY '<пароль>';
-GRANT ALL PRIVILEGES ON zabbix.* TO 'zabbix'@'localhost';
-FLUSH PRIVILEGES;
-EXIT
-```
-```bash
-zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | sudo mysql -u zabbix -p zabbix
-sudo nano /etc/zabbix/zabbix_server.conf
-sudo systemctl restart zabbix-server.service
-ssh 10.10.2.29
-sudo su
-wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb
-dpkg -i zabbix-release_latest_6.0+ubuntu24.04_all.deb
-apt update
-apt install zabbix-agent -y
-nano /etc/zabbix/zabbix_agentd.conf
-exit
-sudo systemctl restart zabbix-agent.service
-sudo systemctl status zabbix-agent.service
-exit
-ssh 10.10.3.33
-sudo su
-wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb
-dpkg -i zabbix-release_latest_6.0+ubuntu24.04_all.deb
-apt update
-apt install zabbix-agent -y
-nano /etc/zabbix/zabbix_agentd.conf
-exit
-sudo systemctl restart zabbix-agent.service
-sudo systemctl status zabbix-agent.service
-exit
-```
+
+Когда всё "зелёное", можно приступить к созданию дешбордов: в opensearch для логов и zabbix для мониторинга:
+
+## OpenSearch
+
+<img src="image/opensearch-dashboard.png" alt="OpenSearch" width="800"> 
+
+## Zabbix
+
+<img src="image/zabbix-dashboard.png" alt="Zabbix" width="800"> 
