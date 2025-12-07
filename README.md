@@ -21,7 +21,7 @@ yc init
 yc iam key create --service-account-id aj6***********lmj --output tf-key.json
 chmod 600 tf-key.json
 ```
-Создаём приватную [подсеть](Building_virtual_machines.md) в зоне `ru-central1-a`
+Создаём приватную подсеть [`private-subnet-a`](Creating_subnets.md) в зоне `ru-central1-a`
 ```
 resource "yandex_vpc_subnet" "private_a" {
   name = "private-subnet-a"
@@ -35,7 +35,7 @@ resource "yandex_vpc_subnet" "private_a" {
 
 ---
 
-Добавляем NAT-шлюз, формируем таблицу маршрутов и привязываем её к приватной подсети в наш `main.tf`.
+Добавляем NAT-шлюз, формируем таблицу маршрутов и привязываем её к приватной подсети в наш [`main.tf`](config/main.tf).
 ```hcl
 
 resource "yandex_vpc_gateway" "nat_gateway" {
@@ -55,7 +55,7 @@ resource "yandex_vpc_route_table" "private_routes" {
 ### И дополнительно добавляем строчку route_table_id = yandex_vpc_route_table.private_routes.id в блок resource "yandex_vpc_subnet" "private_a"
 ```
 
-Создаём вторую подсеть, где будем использовать зону `ru-central-b`
+Создаём вторую подсеть [`private-subnet-b`](Creating_subnets.md), где будем использовать зону `ru-central-b`
 ```
 resource "yandex_vpc_subnet" "private_b" {
   name = "private-subnet-b"
@@ -66,106 +66,43 @@ resource "yandex_vpc_subnet" "private_b" {
 }
 ```
 
-### Подготовка веб-сервера 1 `web1` в зоне `ru-central1-a`
-Характеристики системы: 
-* Платформа:                      `Intel Ice Lake`
-* Гарантированная доля vCPU:      `20%`
-* vCPU:                           `2`
-* RAM:                            `2 ГБ`
-* Объём дискового пространства:   `10 ГБ`
-* Прерываемая:                    `Да`
-* ОС:                             `Ubuntu 24.04`
-* Внешний IP:                     `Нет`
-* Подсеть:                        `private-subnet-a`
-* Группа безопасности:            `web-sg`
-
-### Подготовка веб-сервера 2 `web2` в зоне `ru-central1-b`
-Характеристики системы: 
-* Платформа:                      `Intel Ice Lake`
-* Гарантированная доля vCPU:      `20%`
-* vCPU:                           `2`
-* RAM:                            `2 ГБ`
-* Объём дискового пространства:   `10 ГБ`
-* Прерываемая:                    `Да`
-* ОС:                             `Ubuntu 24.04`
-* Внешний IP:                     `Нет`
-* Подсеть:                        `private-subnet-b`
-* Группа безопасности:            `web-sg`
+Далее - подготовка веб-сервера 1 [`web1`](Building_virtual_machines.md) в зоне `ru-central1-a` и подготовка веб-сервера 2 [`web2`](Building_virtual_machines.md) в зоне `ru-central1-b`
 
 ---
 
-Формируем Группы безопасности в нашей сети `main-network`:
+Формируем [группы безопасности](Creating_security_groups.md) в нашей сети `main-network` yandex cloud:
 
-Бастион: 
-* Имя: `bastion-sg`
-* Входящий трафик:
-  - `TCP` `22` `CIDR` `0.0.0.0/0`
-* Исходящий трафик:
-  - `Any` `0-65535` `CIDR` `0.0.0.0/0`
-
-Балансировщик:
-* Имя: `alb-sg`
-* Входящий трафик:
-  - `TCP` `80` `CIDR` `0.0.0.0/0`
-  - `Проверки состояния балансировщика`
-* Исходящий трафик:
-  - `Any` `0-65535` `CIDR` `0.0.0.0/0`  ------временно
-
-Zabbix:
-* Имя: `zabbix-sg`
-* Входящий трафик:
-  - `TCP` `22` `CIDR` `0.0.0.0/0`
-  - `TCP` `80` `CIDR` `0.0.0.0/0`
-  - `TCP` `10050-10051` `Группа безопасности` `web-sg`
-* Исходящий трафик:
-  - `Any` `0-65535` `CIDR` `0.0.0.0/0`
-
-Elasticsearch:
-* Имя: `elasticsearch-sg`
-* Входящий трафик:
-  - `TCP` `9200` `Группа безопасности` `web-sg`
-  - `TCP` `9200` `Группа безопасности` `kibana-sg`
-  - `TCP` `22` `Группа безопасности` `bastion-sg`
-* Исходящий трафик:
-  - `Any` `0-65535` `CIDR` `0.0.0.0/0`  ------временно
- 
-Kibana:
-* Имя: `kibana-sg`
-* Входящий трафик:
-  - `TCP` `5601` `CIDR` `0.0.0.0/0`  ------временно
-  - `TCP` `22` `Группа безопасности` `bastion-sg`
-* Исходящий трафик:
-  - `Any` `0-65535` `CIDR` `0.0.0.0/0`
-
-Веб-сервер:
-* Имя: `web-sg`
-* Входящий трафик:
-  - `TCP` `22` `Группа безопасности` `bastion-sg`
-  - `ICMP` `0-65535` `Группа безопасности` `bastion-sg`
-  - `TCP` `80` `Группа безопасности` `alb-sg`
-  - `TCP` `10050` `Группа безопасности` `zabbix-sg`
-* Исходящий трафик:
-  - `Any` `0-65535` `CIDR` `0.0.0.0/0`
-  - `TCP` `9200` `Группа безопасности` `elasticsearch-sg`
+- Бастион `bastion-sg`
+- Балансировщик `alb-sg`
+- Zabbix `zabbix-sg`
+- Optnsearch `opensearch-sg`
+- Logstash `logstash-sg`
+- Веб-сервер `web-sg`
 
 ---
-Создадим ssh-ключ для и добавим его в метаданные `web1` и `web2` для подклюбчения с бастиона
+Создадим ssh-ключ для и добавим его в метаданные `web1` и `web2` для настройки через бастион
 ```bash
 ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 ```
 
 Устанавливаем на `web1` и `web2` nginx
 ```bash
-ssh 10.10.2.29
+ssh 10.10.2.29 #или 10.10.3.33 для web2
 sudo apt update
 sudo apt install -y nginx
 sudo systemctl enable nginx
 ```
 Аналогично и для `web2`.
 
+<img src="image/nginx-status.png" width="800">
+
 Настраиваем балансировщик:
 
 Создаём целевую группу `target-group-web`, группу бэкенда `backend-group-web`, создаём HTTP-роутер `http-router-web` и балансировщик `application-load-balancer-web` (важно в чтобы в группе безопасности был разрешен доступ к некоторым сервисам yandex для проверки состояня балансировщика).
+
+<img src="image/router-web.png" width="500"> <img src="image/target-group.png" width="500"> <img src="image/backend-group.png" width="500">
+
+
 
 ### Подготовка zabbix-сервера
 Характеристики системы: 
