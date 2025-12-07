@@ -100,30 +100,20 @@ sudo systemctl enable nginx
 
 Создаём целевую группу `target-group-web`, группу бэкенда `backend-group-web`, создаём HTTP-роутер `http-router-web` и балансировщик `application-load-balancer-web` (важно в чтобы в группе безопасности был разрешен доступ к некоторым сервисам yandex для проверки состояня балансировщика).
 
-<img src="image/router-web.png" width="500"> <img src="image/target-group.png" width="500"> <img src="image/backend-group.png" width="500">
+<img src="image/router.png" width="400"> 
+<img src="image/backend.png" width="400"> 
+<img src="image/target.png" width="400">
 
 
+Дальше подготовка [`zabbix-сервера`](Building_virtual_machines.md)
 
-### Подготовка zabbix-сервера
-Характеристики системы: 
-* Платформа:                      `Intel Ice Lake`
-* Гарантированная доля vCPU:      `20%`
-* vCPU:                           `2`
-* RAM:                            `2 ГБ`
-* Объём дискового пространства:   `10 ГБ`
-* Прерываемая:                    `Да`
-* ОС:                             `Ubuntu 24.04`
-* Внешний IP:                     `Да`
-* Подсеть:                        `public-subnet`
-* Группа безопасности:            `zabbix-sg`
-
-Авторизуемя и ставим [репозиторий](https://www.zabbix.com/download?zabbix=6.0&os_distribution=ubuntu&os_version=24.04&components=server_frontend_agent&db=mysql&ws=apache).
+Авторизуемя и ставим репозиторий с [сайта](https://www.zabbix.com/download?zabbix=6.0&os_distribution=ubuntu&os_version=24.04&components=server_frontend_agent&db=mysql&ws=apache) zabbix.
 >Буду использовать MySQL для экономии времени, в ином случае пользовался бы PostgreSQL.
 ```
 wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb
 dpkg -i zabbix-release_latest_6.0+ubuntu22.04_all.deb
 ```
-Дальше настроим прпавила безопасности `MariaDB` 
+Дальше настроим правила безопасности `MariaDB` 
 ```
 sudo mysql_secure_installation
 ```
@@ -190,8 +180,8 @@ sudo mysql_secure_installation
 >Cleaning up...
 >All done!  If you've completed all of the above steps, your MariaDB
 >installation should now be secure.
-
-Thanks for using MariaDB!
+>
+>Thanks for using MariaDB!
 
 Далее формируем БД и пользователя:
 ```sql
@@ -204,7 +194,11 @@ FLUSH PRIVILEGES
 ```bash
 zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | sudo mysql -u zabbix -p zabbix
 ```
-В файле конфигурации `zabbix_server.conf` задаём пароль и перезпускаем сервис. После подключаемся к zabbix по http://<ip-zabbix-machine>/zabbix, проходим первичные шаги по установке и входим в профиль.
+<img src="image/import-in-zabbix.png" width="800"> 
+
+В файле конфигурации `zabbix_server.conf` задаём пароль и перезпускаем сервис. После подключаемся к zabbix по http://ip-zabbix-machine/zabbix, проходим первичные шаги по установке и входим в профиль.
+
+<img src="image/zabbix.png" width="800"> 
 
 Далее устанавливаем zabbix-agent на наши веб-сервера `web1` и `web2`:
 ```bash
@@ -218,7 +212,9 @@ sudo nano /etc/zabbix/zabbix_agentd.conf
 #В `Server=` и `ServerActive=` выставляем внутренний ip-адресс нашей вм с zabbix `zabbix-machine`, т.е. 10.10.1.26
 #В пункте `Hostname=` указываем название веб-сервера `web1`/`web2`
 ```
-В веб-интерфейса zabbix добавляем хосты.
+В zabbix UI добавляем хосты.
+
+<img src="image/hosts.png" width="800"> 
 
 ---
 Теперь создадим ВМ `elasticsearch-machine` и установим `Elasticsearch`
