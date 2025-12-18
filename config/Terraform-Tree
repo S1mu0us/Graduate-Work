@@ -1,0 +1,13 @@
+terraform/
+├── alb.tf
+├── network.tf
+├── outputs.tf
+├── providers.tf
+├── security-groups.tf
+├── sg.tf
+├── snapshots.tf
+├── terraform.tfvars
+├── terraform.tfvars.example
+├── tf-key.json
+├── variables.tf
+└── vms.tf
