@@ -25,7 +25,7 @@
     state: directory
     mode: '0755'
 
-- name: Разместить конфигурацию OpenSearch
+- name: Разместить конфи OpenSearch
   copy:
     src: "opensearch.yml"
     dest: "/etc/opensearch/opensearch.yml"
