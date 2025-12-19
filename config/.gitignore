@@ -1,0 +1,35 @@
+.DS_Store
+*.swp
+*.swo
+*~
+.thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Локальные файлы
+.env
+.env.local
+.env.*.local
+*.local
+
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+.terraform.lock.hcl
+terraform.tfstate.backup
+tf-key.json
+
+ansible/.vault_pass.txt
+ansible/*.retry
+ansible/inventory/hosts.ini
+
+*.log
+logs/
+
+tmp/
+temp/
