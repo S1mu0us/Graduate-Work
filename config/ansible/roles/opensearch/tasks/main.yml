@@ -1,0 +1,7 @@
+- name: Вкл задачи для сервера
+  include_tasks: server/main.yml
+  when: "'opensearch' in group_names"
+
+- name: Вкл задачи для UI
+  include_tasks: dashboard/main.yml
+  when: "'log' in group_names"

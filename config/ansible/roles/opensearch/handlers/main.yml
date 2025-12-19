@@ -1,0 +1,9 @@
+- name: restart opensearch
+  service:
+    name: opensearch
+    state: restarted
+
+- name: restart opensearch-dashboards
+  service:
+    name: opensearch-dashboards
+    state: restarted

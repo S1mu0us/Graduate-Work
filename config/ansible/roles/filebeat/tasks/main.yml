@@ -1,0 +1,53 @@
+- name: Добавить GPG ключ Elastic
+  apt_key:
+    url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+    state: present
+
+- name: Добавить репу Filebeat
+  apt_repository:
+    repo: "https://mirror.yandex.ru/mirrors/elastic/9/pool/main/f/filebeat/filebeat-9.2.3-amd64.deb"
+    state: present
+    update_cache: yes
+
+- name: Установить Filebeat
+  apt:
+    name: "filebeat={{ filebeat_version }}"
+    state: present
+
+- name: Разместить основной конфиг filebeat.yml
+  copy:
+    src: "filebeat.yml"
+    dest: "/etc/filebeat/filebeat.yml"
+    mode: '0644'
+  notify: restart filebeat
+
+- name: Настроить модуль system
+  copy:
+    src: "system.yml"
+    dest: "/etc/filebeat/modules.d/system.yml"
+    mode: '0644'
+  notify: restart filebeat
+
+- name: Настроить модуль nginx
+  copy:
+    src: "nginx.yml"
+    dest: "/etc/filebeat/modules.d/nginx.yml"
+    mode: '0644'
+  notify: restart filebeat
+
+- name: Включить модули
+  command: "filebeat modules enable {{ item }}"
+  with_items: "{{ filebeat_modules_enabled }}"
+  notify: restart filebeat
+
+- name: Отключить модули
+  command: "filebeat modules disable {{ item }}"
+  with_items: "{{ filebeat_modules_disabled }}"
+  when: filebeat_modules_disabled | length > 0
+  notify: restart filebeat
+
+- name: Запустить Filebeat
+  service:
+    name: filebeat
+    state: started
+    enabled: yes

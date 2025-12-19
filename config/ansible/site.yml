@@ -1,0 +1,71 @@
+- name: Загрузить зашифрованные переменные
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Загрузить золото из хранилища
+      include_vars:
+        file: "{{ playbook_dir }}/vault/gold.yml"
+        name: vault_secrets
+      no_log: true
+
+- name: Настройка хостов
+  hosts: all
+  become: yes
+  tasks:
+    - name: apt update
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Установить базовые пакеты
+      apt:
+        name:
+          - curl
+          - wget
+          - vim
+          - htop
+          - net-tools
+        state: present
+  roles:
+    - common
+
+- name: Настройка веб-серверов
+  hosts: web
+  become: yes
+  tasks:
+    - name: Установить nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Запустить nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+  roles:
+    - nginx
+    - zabbix
+    - filebeat
+
+- name: Настройка logstash
+  hosts: log
+  become: yes
+  roles:
+    - zabbix
+    - opensearch
+    - logstash
+
+- name: Настройка opensearch
+  hosts: opensearch
+  become: yes
+  roles:
+    - zabbix
+    - opensearch
+
+- name: Настройка мониторинга
+  hosts: monitor
+  become: yes
+  roles:
+    - zabbix

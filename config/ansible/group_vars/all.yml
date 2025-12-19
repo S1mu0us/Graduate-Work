@@ -1,0 +1,27 @@
+timezone: Europe/Moscow
+locale: ru_RU.UTF-8
+
+upgrade_type: safe
+upgrade_packages: false
+
+ssh_public_key: "{{ vault_secrets.ssh_public_key }}"
+
+install_smartmontools: true
+
+network:
+  zabbix_host: "10.10.1.26"
+  opensearch_host: "10.10.3.9"
+  logstash_host: "10.10.3.11"
+  web_hosts:
+    - "10.10.2.29"
+    - "10.10.3.33"
+  ports:
+    nginx: 80
+    zabbix_agent: 10050
+    zabbix_server: 10051
+    zabbix_web: 80
+    opensearch: 9200
+    opensearch_dashboard: 5601
+    logstash_beats: 5044
+
+install_smartmontools: true

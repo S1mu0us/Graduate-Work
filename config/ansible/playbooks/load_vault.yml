@@ -1,0 +1,20 @@
+- name: Загрузить зашифрованные переменные
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Загрузить золото из хранилища
+      include_vars:
+        file: "{{ playbook_dir }}/vault/secrets.yml"
+        name: vault_secrets
+      no_log: true
+
+- name: Отладка
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Проверить загрузку переменных
+      debug:
+        msg: "Vault переменные загружены: {{ vault_secrets.keys() | list }}"
+      when: debug_vault | default(false)

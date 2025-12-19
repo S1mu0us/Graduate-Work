@@ -1,0 +1,11 @@
+opensearch_version: "3.4.0"
+opensearch_dashboard_version: "3.4.0"
+
+opensearch_cluster_name: "my-opensearch-cluster"
+opensearch_node_name: "{{ inventory_hostname }}"
+opensearch_network_host: "0.0.0.0"
+opensearch_http_port: 9200
+
+opensearch_dashboard_host: "0.0.0.0"
+opensearch_dashboard_port: 5601
+opensearch_server_url: "http://10.10.3.9:9200"

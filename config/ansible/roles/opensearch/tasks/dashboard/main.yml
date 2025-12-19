@@ -1,0 +1,47 @@
+# ansible/roles/opensearch/tasks/dashboard/main.yml
+---
+- name: Java install
+  apt:
+    name: openjdk-25-jdk
+    state: present
+
+- name: Добавить GPG ключ OpenSearch
+  apt_key:
+    url: "https://artifacts.opensearch.org/publickeys/opensearch.pgp"
+    state: present
+
+- name: Добавить репо OpenSearch
+  apt_repository:
+    repo: "https://artifacts.opensearch.org/releases/bundle/opensearch-dashboards/3.4.0/opensearch-dashboards-3.4.0-linux-x64.deb"
+    state: present
+    update_cache: yes
+
+- name: Установить OpenSearch Dashboard
+  apt:
+    name: "opensearch-dashboards={{ opensearch_dashboard_version }}"
+    state: present
+
+- name: Создать директорию для конфигов
+  file:
+    path: /etc/opensearch-dashboards
+    state: directory
+    mode: '0755'
+
+- name: Разместить конфигурацию Dashboard
+  copy:
+    src: "opensearch_dashboards.yml"
+    dest: "/etc/opensearch-dashboards/opensearch_dashboards.yml"
+    mode: '0644'
+  notify: restart opensearch-dashboards
+
+- name: Запустить OpenSearch Dashboard
+  service:
+    name: opensearch-dashboards
+    state: started
+    enabled: yes
+
+- name: Запуска Dashboard
+  wait_for:
+    port: 5601
+    delay: 5
+    timeout: 60

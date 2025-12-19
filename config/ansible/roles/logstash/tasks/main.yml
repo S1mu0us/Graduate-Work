@@ -1,0 +1,66 @@
+- name: Java install
+  apt:
+    name: openjdk-25-jdk
+    state: present
+
+- name: Добавить GPG ключ Elastic
+  apt_key:
+    url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+    state: present
+
+- name: Добавить репо Logstash
+  apt_repository:
+    repo: "https://mirror.yandex.ru/mirrors/elastic/9/pool/main/l/logstash/logstash-9.2.3-amd64.deb"
+    state: present
+    update_cache: yes
+
+- name: Установить Logstash
+  apt:
+    name: "logstash={{ logstash_version }}"
+    state: present
+
+- name: Создать директорию для конфигов
+  file:
+    path: /etc/logstash/conf.d
+    state: directory
+    mode: '0755'
+
+- name: Разместить конфигурацию beats-to-opensearch
+  copy:
+    src: "beats-to-opensearch.conf"
+    dest: "/etc/logstash/conf.d/beats-to-opensearch.conf"
+    mode: '0644'
+  notify: restart logstash
+
+- name: Разместить конфигурацию nginx
+  copy:
+    src: "nginx.conf"
+    dest: "/etc/logstash/conf.d/nginx.conf"
+    mode: '0644'
+  notify: restart logstash
+
+- name: Создать pipelines.yml
+  template:
+    src: "pipelines.yml.j2"
+    dest: "/etc/logstash/pipelines.yml"
+    mode: '0644'
+  notify: restart logstash
+
+- name: Настроить jvm.options
+  copy:
+    src: "jvm.options"
+    dest: "/etc/logstash/jvm.options"
+    mode: '0644'
+  notify: restart logstash
+
+- name: Запустить Logstash
+  service:
+    name: logstash
+    state: started
+    enabled: yes
+
+- name: Запуск Logstash
+  wait_for:
+    port: 5044
+    delay: 5
+    timeout: 60

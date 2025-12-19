@@ -1,0 +1,49 @@
+- name: nginx install
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Создать директорию сайта
+  file:
+    path: /var/www/html
+    state: directory
+    mode: '0755'
+
+- name: Разместить тестовую страницу
+  copy:
+    dest: /var/www/html/index.html
+    content: |
+      <!DOCTYPE html>
+      <html>
+      <head><title>{{ inventory_hostname }}</title></head>
+      <body>
+        <h1>Server: {{ inventory_hostname }}</h1>
+        <p>IP: {{ ansible_default_ipv4.address }}</p>
+      </body>
+      </html>
+
+- name: Разместить конфигурацию nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: Разместить конфигурацию сайта
+  template:
+    src: site.conf.j2
+    dest: /etc/nginx/sites-available/default
+  notify: restart nginx
+
+- name: Включить сайт
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: restart nginx
+
+- name: Убедиться что nginx запущен
+  service:
+    name: nginx
+    state: started
+    enabled: yes

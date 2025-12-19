@@ -1,0 +1,125 @@
+# ansible/roles/zabbix/tasks/server/main.yml
+---
+- name: MariaDB-сервер install
+  apt:
+    name:
+      - mariadb-server
+      - mariadb-client
+    state: present
+
+- name: Запустить MariaDB
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Установить пароль MariaDB
+  mysql_user:
+    login_user: root
+    login_password: ""
+    name: root
+    password: "{{ zabbix_db_root_password }}"
+    host: localhost
+    check_implicit_admin: yes
+
+- name: Создать базу данных для Zabbix
+  mysql_db:
+    login_user: root
+    login_password: "{{ zabbix_db_root_password }}"
+    name: "{{ zabbix_db_name }}"
+    encoding: utf8
+    collation: utf8_bin
+
+- name: Создать пользователя Zabbix в MariaDB
+  mysql_user:
+    login_user: root
+    login_password: "{{ zabbix_db_root_password }}"
+    name: "{{ zabbix_db_user }}"
+    password: "{{ zabbix_db_password }}"
+    host: localhost
+    priv: "{{ zabbix_db_name }}.*:ALL"
+    state: present
+
+- name: Добавить репозиторий Zabbix
+  apt_repository:
+    repo: "https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb"
+    state: present
+    update_cache: yes
+
+- name: Установить Zabbix сервер, frontend и агент
+  apt:
+    name:
+      - "zabbix-server-mysql={{ zabbix_server_version }}"
+      - "zabbix-frontend-php={{ zabbix_frontend_version }}"
+      - "zabbix-apache-conf={{ zabbix_frontend_version }}"
+      - "zabbix-sql-scripts"
+      - "zabbix-agent2={{ zabbix_agent_version }}"
+    state: present
+
+- name: Импортировать схему базы данных
+  command: >
+    zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz
+    | mysql -uroot -p{{ zabbix_db_root_password }} {{ zabbix_db_name }}
+  args:
+    creates: "/var/lib/mysql/{{ zabbix_db_name }}/users.ibd"
+
+- name: Настроить zabbix_server.conf
+  template:
+    src: "zabbix_server.conf.j2"
+    dest: "/etc/zabbix/zabbix_server.conf"
+  notify: restart zabbix-server
+
+- name: Настроить конфигурацию PHP для Zabbix
+  template:
+    src: "zabbix.conf.php.j2"
+    dest: "/etc/zabbix/web/zabbix.conf.php"
+
+- name: Настроить Apache для Zabbix
+  template:
+    src: "zabbix_apache.conf.j2"
+    dest: "/etc/apache2/conf-available/zabbix.conf"
+  notify: restart apache2
+
+- name: Включм конфигурацию Apache
+  file:
+    src: /etc/apache2/conf-available/zabbix.conf
+    dest: /etc/apache2/conf-enabled/zabbix.conf
+    state: link
+  notify: restart apache2
+
+- name: Настроить таймзону PHP
+  lineinfile:
+    path: /etc/php/*/apache2/php.ini
+    regexp: "^;?date.timezone ="
+    line: "date.timezone = {{ timezone }}"
+  notify: restart apache2
+
+- name: Запустить Zabbix сервер
+  service:
+    name: zabbix-server
+    state: started
+    enabled: yes
+
+- name: Запустить Apache
+  service:
+    name: apache2
+    state: started
+    enabled: yes
+
+- name: Создать админа Zabbix
+  uri:
+    url: "http://localhost/zabbix/api_jsonrpc.php"
+    method: POST
+    body_format: json
+    body:
+      jsonrpc: "2.0"
+      method: "user.login"
+      params:
+        user: "Admin"
+        password: "zabbix"
+      id: 1
+    status_code: 200
+    return_content: yes
+  register: zabbix_login
+  ignore_errors: yes
+  changed_when: false

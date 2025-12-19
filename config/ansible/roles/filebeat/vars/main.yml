@@ -1,0 +1,20 @@
+filebeat_version: "9.2.3"
+#filebeat_mirror: "https://mirror.yandex.ru/mirrors/elastic/9/pool/main/f/filebeat/filebeat-9.2.3-amd64.deb"
+
+filebeat_modules_enabled:
+  - system
+  - nginx
+
+filebeat_modules_disabled:
+  - apache
+  - auditd
+  - elasticsearch
+  - kibana
+  - logstash
+  - mysql
+  - postgresql
+  - redis
+  - traefik
+
+logstash_host: "10.10.3.11"
+logstash_port: 5044

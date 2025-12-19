@@ -1,0 +1,12 @@
+cluster.name: my-opensearch-cluster
+node.name: ${HOSTNAME}
+path.data: /var/lib/opensearch
+path.logs: /var/log/opensearch
+network.host: 0.0.0.0
+http.port: 9200
+discovery.type: single-node
+
+plugins.security.disabled: true
+plugins.security.ssl.transport.pemtrustedcas_filepath: /etc/opensearch/root-ca.pem
+
+cluster.initial_master_nodes: ["opensearch-machine"]

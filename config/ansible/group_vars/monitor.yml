@@ -1,0 +1,6 @@
+# Настройки Zabbix-server
+zabbix_type: server
+zabbix_server_host: "{{ ansible_default_ipv4.address }}"
+
+zabbix_db_root_password: "{{ vault_secrets.zabbix_db_root_password }}"
+zabbix_db_password: "{{ vault_secrets.zabbix_db_password }}"

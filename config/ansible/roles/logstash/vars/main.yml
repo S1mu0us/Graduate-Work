@@ -1,0 +1,6 @@
+logstash_version: "1:9.2.3-1"
+
+#logstash_mirror: "https://mirror.yandex.ru/mirrors/elastic/9/pool/main/e/elasticsearch/elasticsearch-9.2.3-amd64.deb"
+
+logstash_input_port: 5044
+opensearch_host: "10.10.3.9:9200"

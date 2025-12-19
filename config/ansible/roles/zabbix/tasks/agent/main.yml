@@ -1,0 +1,32 @@
+- name: Добавить репу
+  apt_repository:
+    repo: "https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_6.0+ubuntu24.04_all.deb"
+    state: present
+    update_cache: yes
+
+- name: Установить Zabbix агент 2
+  apt:
+    name: "zabbix-agent2"
+    state: present
+
+- name: Настроить конфигурацию Zabbix агента
+  template:
+    src: zabbix_agent2.conf.j2
+    dest: /etc/zabbix/zabbix_agent2.conf
+  notify: restart zabbix-agent2
+
+- name: Настроить user parameters (если есть)
+  copy:
+    src: "{{ item }}"
+    dest: /etc/zabbix/zabbix_agent2.d/
+    mode: '0644'
+  with_fileglob:
+    - "{{ playbook_dir }}/roles/zabbix/files/userparameter_*.conf"
+  when: "'userparameter_' in item"
+  notify: restart zabbix-agent2
+
+- name: Запустить Zabbix агент
+  service:
+    name: zabbix-agent2
+    state: started
+    enabled: yes

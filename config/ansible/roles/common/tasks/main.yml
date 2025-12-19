@@ -1,0 +1,66 @@
+- name: apt update
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Установить базовые утилиты
+  apt:
+    name:
+      - curl
+      - wget
+      - vim
+      - htop
+      - net-tools
+      - tree
+      - git
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - python3-pip
+      - unattended-upgrades
+    state: present
+
+- name: Установка времени
+  timezone:
+    name: "{{ timezone | default('Europe/Moscow') }}"
+
+- name: Настроить локализацию
+  locale_gen:
+    name: "{{ locale | default('ru_RU.UTF-8') }}"
+    state: present
+
+- name: Настроить hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Обновить пакеты
+  apt:
+    upgrade: "{{ upgrade_type | default('safe') }}"
+    autoremove: yes
+  when: upgrade_packages | default(false) | bool
+
+- name: Мониторинг диска
+  apt:
+    name: smartmontools
+    state: present
+  when: install_smartmontools | default(false) | bool
+
+- name: Настроить SSH
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^{{ item.key }}\\s"
+    line: "{{ item.key }} {{ item.value }}"
+    state: present
+  with_items:
+    - { key: "PermitRootLogin", value: "no" }
+    - { key: "PasswordAuthentication", value: "no" }
+    - { key: "X11Forwarding", value: "no" }
+  notify: restart sshd
+
+- name: Добавить пользователей SSH ключи
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ ssh_public_key }}"
+    state: present
+  when: ssh_public_key is defined

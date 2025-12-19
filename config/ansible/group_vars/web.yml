@@ -1,0 +1,9 @@
+zabbix_type: agent
+zabbix_server_host: "10.10.1.26"
+
+filebeat_enabled: true
+
+nginx_sites:
+  - name: "myapp"
+    root: "/var/www/html"
+    index: "index.html"

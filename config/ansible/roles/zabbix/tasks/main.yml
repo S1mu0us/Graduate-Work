@@ -1,0 +1,7 @@
+- name: Включить задачи для Zabbix-агента
+  include_tasks: agent/main.yml
+  when: zabbix_type == 'agent'
+
+- name: Включить задачи для Zabbix-сервера
+  include_tasks: server/main.yml
+  when: zabbix_type == 'server'

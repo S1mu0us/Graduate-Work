@@ -1,0 +1,7 @@
+opensearch_server_enabled: false
+opensearch_dashboard_enabled: true
+
+zabbix_type: agent
+zabbix_server_host: "10.10.1.26"
+
+logstash_enabled: true

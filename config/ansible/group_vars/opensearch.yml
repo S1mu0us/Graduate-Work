@@ -1,0 +1,5 @@
+opensearch_server_enabled: true
+opensearch_dashboard_enabled: false
+
+zabbix_type: agent
+zabbix_server_host: "{{ network.zabbix_host }}"

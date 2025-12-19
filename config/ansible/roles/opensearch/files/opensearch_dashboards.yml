@@ -1,0 +1,8 @@
+server.host: "0.0.0.0"
+server.port: 5601
+opensearch.hosts: ["http://10.10.3.9:9200"]
+opensearch.ssl.verificationMode: none
+opensearch.requestHeadersWhitelist: [authorization, securitytenant]
+opensearch_security.multitenancy.enabled: false
+opensearch_security.readonly_mode.roles: []
+i18n.locale: "en"
