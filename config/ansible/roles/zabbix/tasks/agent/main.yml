@@ -4,18 +4,18 @@
     state: present
     update_cache: yes
 
-- name: Установить Zabbix агент 2
+- name: Установитьагент 2
   apt:
     name: "zabbix-agent2"
     state: present
 
-- name: Настроить конфигурацию Zabbix агента
+- name: Настроить конфиг
   template:
     src: zabbix_agent2.conf.j2
     dest: /etc/zabbix/zabbix_agent2.conf
   notify: restart zabbix-agent2
 
-- name: Настроить user parameters (если есть)
+- name: Настроить user
   copy:
     src: "{{ item }}"
     dest: /etc/zabbix/zabbix_agent2.d/
