@@ -58,7 +58,7 @@
     - { key: "X11Forwarding", value: "no" }
   notify: restart sshd
 
-- name: Добавить пользователей SSH ключи
+- name: Добавить пользователей (SSH ключи)
   authorized_key:
     user: "{{ ansible_user }}"
     key: "{{ ssh_public_key }}"
