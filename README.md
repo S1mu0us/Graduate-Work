@@ -1,6 +1,11 @@
 #  Дипломная работа по профессии «[Системный администратор](https://github.com/netology-code/sys-diplom/blob/diplom-zabbix/README.md)»
 ---
 
+## Содержание
+- [Автоматизация](#автоматизация)
+
+
+##
 Создаём и подготавливаем ВМ [`bastion-vm`](Building_virtual_machines.md) <sub>Ранее: graduate-work-vm</sub> , она будет играть роль бастиона. 
 
 Установка пакетов
