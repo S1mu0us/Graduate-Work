@@ -282,4 +282,10 @@ sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash 
 
 <img src="image/zabbix-dashboard.png" alt="Zabbix" width="800"> 
 
+---
 
+### Автоматизация
+
+Деревья файловой структуры `Terraform` и `Ansible` получилось следующим: [для Terraform](config/Terraform-Tree), [для Ansible](config/Ansible-Tree)
+
+Внутреннюю составляющую можно осмотреть в соответствующих директориях: [Terraform](config/terraform), [Ansible](config/ansible)
