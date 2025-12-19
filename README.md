@@ -1,7 +1,7 @@
 #  Дипломная работа по профессии «[Системный администратор](https://github.com/netology-code/sys-diplom/blob/diplom-zabbix/README.md)»
 ---
 
-Создаём и подготавливаем ВМ [`bastion-vm`](https://github.com/S1mu0us/Graduate-Work/blob/main/Building_virtual_machines.md?plain=1#L1-L11) <sub>Ранее: graduate-work-vm</sub> , она будет играть роль бастиона. 
+Создаём и подготавливаем ВМ [`bastion-vm`](Building_virtual_machines.md) <sub>Ранее: graduate-work-vm</sub> , она будет играть роль бастиона. 
 
 Установка пакетов
 ```bash
