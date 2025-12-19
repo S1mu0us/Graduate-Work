@@ -2,10 +2,18 @@
 ---
 
 ## Содержание
+- [Начало](#формирование)
+- [Группы безопасности](#группы-безопасности)
+- [Nginx](#nginx)
+- [Балансиравщик](#alb)
+- [Zabbix-server & Zabbix-agent](#zabbix)
+- [Elasticsearch & Opensearch](#elasticsearch--opensearch)
+- [Резервное копирование](#резервное-копирование)
+- [Дешборды](#dashboards)
 - [Автоматизация](#автоматизация)
 
+## Формирование
 
-##
 Создаём и подготавливаем ВМ [`bastion-vm`](Building_virtual_machines.md) <sub>Ранее: graduate-work-vm</sub> , она будет играть роль бастиона. 
 
 Установка пакетов
@@ -75,6 +83,8 @@ resource "yandex_vpc_subnet" "private_b" {
 
 ---
 
+### Группы безопасности
+
 Формируем [группы безопасности](Creating_security_groups.md) в нашей сети `main-network` yandex cloud:
 
 - Бастион `bastion-sg`
@@ -89,6 +99,9 @@ resource "yandex_vpc_subnet" "private_b" {
 ```bash
 ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
 ```
+---
+
+### Nginx
 
 Устанавливаем на `web1` и `web2` nginx
 ```bash
@@ -101,6 +114,10 @@ sudo systemctl enable nginx
 
 <img src="image/nginx-status.png" width="800">
 
+---
+
+### ALB
+
 Настраиваем балансировщик:
 
 Создаём целевую группу `target-group-web`, группу бэкенда `backend-group-web`, создаём HTTP-роутер `http-router-web` и балансировщик `application-load-balancer-web` (важно в чтобы в группе безопасности был разрешен доступ к некоторым сервисам yandex для проверки состояня балансировщика).
@@ -109,6 +126,9 @@ sudo systemctl enable nginx
 <img src="image/backend.png" width="400"> 
 <img src="image/target.png" width="400">
 
+---
+
+### Zabbix
 
 Дальше подготовка [`zabbix-сервера`](Building_virtual_machines.md)
 
@@ -223,6 +243,8 @@ sudo nano /etc/zabbix/zabbix_agentd.conf
 
 ---
 
+## Elasticsearch & Opensearch
+
 Далее была [попытка](elasticsearch.md) поднять `Elasticsearch` + `Kibana`, но на этапе подключения web1 и web2 возникли проблемы, поэтому было принято решение использовать форк Elasticsearch, т.е. `Opensearch`
 
 Создаём отдельные вм: [`opensearch-machine`]((Building_virtual_machines.md)) <sub>elasticsearch-machine</sub> для opensearch-server и [`logstash-machine`]((Building_virtual_machines.md)) <sub>kibana-machine</sub> для opensearch-dashboards, logstash и filebeats
@@ -273,9 +295,15 @@ sudo nano /etc/logstash/conf.d/nginx.conf
 sudo -u logstash /usr/share/logstash/bin/logstash --path.settings /etc/logstash -t
 ```
 
+---
+
+## Резервное копирование
+
 Дальше сделаем резервное копирование
 
 <img src="image/snapshots.png" alt="OpenSearch" width="500"> 
+
+## Dashboards
 
 Когда всё "зелёное", можно приступить к созданию дешбордов: в opensearch для логов и zabbix для мониторинга:
 
