@@ -4,12 +4,10 @@
 *~
 .thumbs.db
 
-# IDE
 .vscode/
 .idea/
 *.code-workspace
 
-# Локальные файлы
 .env
 .env.local
 .env.*.local
