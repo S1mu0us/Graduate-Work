@@ -1,4 +1,7 @@
-#  Дипломная работа по профессии «[Системный администратор](https://github.com/netology-code/sys-diplom/blob/diplom-zabbix/README.md)»
+# Создание отказоустойчивой инфраструктуры в Yandex Cloud включающую мониторинг, сбор логов и резервное копирование основных данных.
+
+<div align="right"><sub>Выпускная работа по профессии «<a href="https://example.com](https://github.com/netology-code/sys-diplom/blob/diplom-zabbix/README.md">Системный администратор</a>» </sub></div>
+
 ---
 
 ## Содержание
